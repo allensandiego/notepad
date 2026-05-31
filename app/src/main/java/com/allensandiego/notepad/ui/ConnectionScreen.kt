@@ -236,7 +236,7 @@ fun ConnectionScreen(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .clickable { uriHandler.openUri("https://supabase.com/dashboard/project/new?repository=https://github.com/allensandiego/notepad") }
+                            .clickable { uriHandler.openUri("https://supabase.com/dashboard/new?repository=https://github.com/allensandiego/notepad") }
                             .padding(vertical = 4.dp)
                     )
 
