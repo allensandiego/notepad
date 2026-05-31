@@ -96,3 +96,10 @@ The codebase includes separate test suites for local logic validation and full i
 
 > [!TIP]
 > **Test Environment Isolation**: During instrumented tests, the app automatically switches to an isolated database (`notepad_database_test`) and test preferences (`supabase_prefs_test`). This ensures your live manual test data and connection configurations on the test device are never altered or wiped out.
+
+---
+
+## 🎨 Credits & Attributions
+
+*   App Icon: Designed by [Magnific](https://www.magnific.com) (Source: [Notepad Icon](https://www.magnific.com/icon/notepad_4105782#fromView=search&page=1&position=4&uuid=c4d236cd-4c03-483d-9875-991eac4005e0))
+
