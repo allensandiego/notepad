@@ -7,6 +7,9 @@ local.properties
 
 # Log/OS Files
 *.log
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # Android Studio generated files and folders
 captures/
@@ -15,6 +18,7 @@ captures/
 *.aab
 *.apk
 output-metadata.json
+navigation/
 
 # IntelliJ
 *.iml
@@ -22,6 +26,8 @@ output-metadata.json
 misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
+modules.xml
+workspace.xml
 
 # Keystore files
 *.jks
@@ -32,3 +38,16 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Kotlin
+.kotlin/
+kotlin-daemon-debug.log
+
+# Environment and Secrets
+.env
+env
+secrets.properties
+
+# Debug/Temporary files
+view.xml
+*.tmp
