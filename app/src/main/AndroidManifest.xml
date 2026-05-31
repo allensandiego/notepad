@@ -19,11 +19,13 @@
         android:theme="@style/Theme.Notepad">
         <meta-data
             android:name="com.bugsnag.android.API_KEY"
-            android:value="YOUR_BUGSNAG_API_KEY"/>
+            android:value="${bugsnagApiKey}"/>
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Notepad">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

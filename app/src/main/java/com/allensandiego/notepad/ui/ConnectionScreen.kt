@@ -231,6 +231,18 @@ fun ConnectionScreen(
 
                     val uriHandler = LocalUriHandler.current
                     Text(
+                        text = "🚀 One-Click Supabase Database Setup",
+                        color = AccentMint,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .clickable { uriHandler.openUri("https://supabase.com/dashboard/project/new?repository=https://github.com/allensandiego/notepad") }
+                            .padding(vertical = 4.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
                         text = "Need an account? Sign up on Supabase",
                         color = AccentMint,
                         fontSize = 13.sp,
@@ -398,6 +410,7 @@ fun ConnectionScreen(
                             CREATE TABLE IF NOT EXISTS custom_tables (
                                 id TEXT PRIMARY KEY,
                                 name TEXT NOT NULL UNIQUE,
+                                parent_table_id TEXT REFERENCES custom_tables(id) ON DELETE CASCADE,
                                 created_at BIGINT NOT NULL
                             );
 
@@ -408,7 +421,8 @@ fun ConnectionScreen(
                                 type TEXT NOT NULL,
                                 required BOOLEAN NOT NULL,
                                 default_value TEXT,
-                                default_type TEXT
+                                default_type TEXT,
+                                is_system BOOLEAN NOT NULL DEFAULT FALSE
                             );
 
                             CREATE TABLE IF NOT EXISTS custom_records (
@@ -425,13 +439,33 @@ fun ConnectionScreen(
                                 UNIQUE(record_id, field_id)
                             );
 
-                            -- 2. Disable RLS policies for simplicity 
-                            -- (Or add permissive read/write policies)
-                            
+                            -- Disable RLS on data tables to allow client-side PostgREST synchronization
                             ALTER TABLE custom_tables DISABLE ROW LEVEL SECURITY;
                             ALTER TABLE custom_fields DISABLE ROW LEVEL SECURITY;
                             ALTER TABLE custom_records DISABLE ROW LEVEL SECURITY;
                             ALTER TABLE custom_values DISABLE ROW LEVEL SECURITY;
+
+                            -- 2. Setup Storage Bucket for file attachments
+                            INSERT INTO storage.buckets (id, name, public)
+                            VALUES ('attachments', 'attachments', true)
+                            ON CONFLICT (id) DO NOTHING;
+
+                            -- Enable RLS on storage.objects to define explicit policies
+                            ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+                            -- Allow public upload access to the attachments bucket
+                            DROP POLICY IF EXISTS "Allow public upload to attachments" ON storage.objects;
+                            CREATE POLICY "Allow public upload to attachments"
+                            ON storage.objects FOR INSERT
+                            TO public
+                            WITH CHECK (bucket_id = 'attachments');
+
+                            -- Allow public read access to the attachments bucket
+                            DROP POLICY IF EXISTS "Allow public select from attachments" ON storage.objects;
+                            CREATE POLICY "Allow public select from attachments"
+                            ON storage.objects FOR SELECT
+                            TO public
+                            USING (bucket_id = 'attachments');
                         """.trimIndent()
 
                         Box(

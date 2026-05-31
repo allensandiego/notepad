@@ -1,3 +1,16 @@
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
+val bugsnagApiKey = localProperties.getProperty("bugsnag.api.key") ?: "YOUR_BUGSNAG_API_KEY"
+val admobAppId = localProperties.getProperty("admob.app_id") ?: "YOUR_ADMOB_APP_ID"
+val admobBannerId = localProperties.getProperty("admob.banner_ad_unit_id") ?: "YOUR_ADMOB_BANNER_ID"
+val admobNativeId = localProperties.getProperty("admob.native_ad_unit_id") ?: "YOUR_ADMOB_NATIVE_ID"
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -13,10 +26,15 @@ android {
         applicationId = "com.allensandiego.notepad"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 7
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["bugsnagApiKey"] = bugsnagApiKey
+        manifestPlaceholders["admobAppId"] = admobAppId
+
+        buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"$admobBannerId\"")
+        buildConfigField("String", "ADMOB_NATIVE_AD_UNIT_ID", "\"$admobNativeId\"")
     }
 
     buildTypes {
@@ -34,6 +52,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -78,4 +97,7 @@ dependencies {
     // BugSnag
     implementation(libs.bugsnag.android)
     implementation(libs.bugsnag.android.performance)
+
+    // AdMob
+    implementation(libs.play.services.ads)
 }

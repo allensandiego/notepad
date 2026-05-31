@@ -1,5 +1,6 @@
 package com.allensandiego.notepad.ui
 
+import com.allensandiego.notepad.ui.components.NativeAdCard
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -149,7 +150,7 @@ fun RecordListContent(
             ) {
                 items(filteredRecords) { record ->
                     val values = recordValuesMap[record.id] ?: emptyList()
-                RecordCard(
+                    RecordCard(
                         record = record,
                         fields = fields,
                         values = values,
@@ -163,6 +164,9 @@ fun RecordListContent(
                         },
                         databaseDao = databaseDao
                     )
+                }
+                item {
+                    NativeAdCard(modifier = Modifier.padding(top = 8.dp))
                 }
             }
         }
