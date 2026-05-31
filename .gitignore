@@ -51,3 +51,7 @@ secrets.properties
 # Debug/Temporary files
 view.xml
 *.tmp
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
