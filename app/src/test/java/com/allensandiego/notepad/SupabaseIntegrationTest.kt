@@ -126,7 +126,7 @@ class SupabaseIntegrationTest {
 
         // 2. Test the API HTTP Connection
         println("=== Supabase URL: ${client.getSupabaseUrl()} ===")
-        println("=== Supabase Key: ${client.getSupabaseAnonKey()} ===")
+        println("=== Supabase Key: ${client.getSupabaseApiKey()} ===")
         val apiConnected = client.testConnection()
         println("=== Test Connection Result: ${apiConnected} ===")
         assertTrue("Failed to connect to Supabase REST API", apiConnected)

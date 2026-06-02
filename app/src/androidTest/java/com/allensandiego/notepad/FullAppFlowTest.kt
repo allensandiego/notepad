@@ -37,7 +37,7 @@ class FullAppFlowTest {
 
         // 2. Connection Screen: Enter real credentials (NO PASSWORD)
         composeTestRule.onNodeWithText("Supabase Project URL").performTextReplacement(testUrl)
-        composeTestRule.onNodeWithText("Supabase Anon API Key").performTextReplacement(testApiKey)
+        composeTestRule.onNodeWithText("Supabase API Key").performTextReplacement(testApiKey)
         
         // Ensure keyboard is gone so button is clickable
         composeTestRule.onNodeWithText("Connect Database").performClick()

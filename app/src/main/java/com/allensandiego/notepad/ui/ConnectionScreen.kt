@@ -79,9 +79,9 @@ fun ConnectionScreen(
     val AccentMint = MaterialTheme.colorScheme.secondary
 
     var supabaseUrl by remember { mutableStateOf(supabaseClient.getSupabaseUrl()) }
-    var anonKey by remember { mutableStateOf(supabaseClient.getSupabaseAnonKey()) }
+    var apiKey by remember { mutableStateOf(supabaseClient.getSupabaseApiKey()) }
     var dbPassword by remember { mutableStateOf("") }
-    var showAnonKey by remember { mutableStateOf(false) }
+    var showApiKey by remember { mutableStateOf(false) }
     var showDbPassword by remember { mutableStateOf(false) }
     var isTesting by remember { mutableStateOf(false) }
     var testMessage by remember { mutableStateOf("") }
@@ -126,7 +126,7 @@ fun ConnectionScreen(
             )
 
             Text(
-                text = "Connect to your personal Supabase instance by entering your Project URL and Anon API Key. Provide your Database Password to automatically configure all remote tables.",
+                text = "Connect to your personal Supabase instance by entering your Project URL and Publishable API Key. Provide your Database Password to automatically configure all remote tables.",
                 fontSize = 14.sp,
                 color = TextMuted,
                 modifier = Modifier.padding(bottom = 32.dp),
@@ -164,25 +164,17 @@ fun ConnectionScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
-                        value = anonKey,
-                        onValueChange = { newValue ->
-                            anonKey = newValue
-                            if (supabaseUrl.isBlank() || supabaseUrl.length < 10) {
-                                val extracted = supabaseClient.extractUrlFromJwt(newValue)
-                                if (extracted != null) {
-                                    supabaseUrl = extracted
-                                }
-                            }
-                        },
-                        label = { Text("Supabase Anon API Key", color = TextMuted) },
-                        placeholder = { Text("your-sb-anon-key-here", color = TextMuted.copy(alpha = 0.5f)) },
+                        value = apiKey,
+                        onValueChange = { apiKey = it },
+                        label = { Text("Supabase API Key", color = TextMuted) },
+                        placeholder = { Text("sb_publishable_...", color = TextMuted.copy(alpha = 0.5f)) },
                         singleLine = true,
-                        visualTransformation = if (showAnonKey) VisualTransformation.None else PasswordVisualTransformation(),
+                        visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
-                            IconButton(onClick = { showAnonKey = !showAnonKey }) {
+                            IconButton(onClick = { showApiKey = !showApiKey }) {
                                 Icon(
-                                    imageVector = if (showAnonKey) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                    contentDescription = if (showAnonKey) "Hide API Key" else "Show API Key",
+                                    imageVector = if (showApiKey) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                    contentDescription = if (showApiKey) "Hide API Key" else "Show API Key",
                                     tint = TextMuted
                                 )
                             }
@@ -268,13 +260,13 @@ fun ConnectionScreen(
 
                     Button(
                         onClick = {
-                            if (supabaseUrl.isNotEmpty() && anonKey.isNotEmpty()) {
+                            if (supabaseUrl.isNotEmpty() && apiKey.isNotEmpty()) {
                                 isTesting = true
                                 testMessage = "Testing API connection..."
                                 testSuccess = null
                                 
                                 scope.launch {
-                                    val saved = supabaseClient.saveCredentials(supabaseUrl, anonKey)
+                                    val saved = supabaseClient.saveCredentials(supabaseUrl, apiKey)
                                     if (!saved) {
                                         isTesting = false
                                         testSuccess = false
@@ -286,7 +278,7 @@ fun ConnectionScreen(
                                     if (!connected) {
                                         isTesting = false
                                         testSuccess = false
-                                        testMessage = "Connection failed. Check your URL and Anon Key."
+                                        testMessage = "Connection failed. Check your URL and API Key."
                                         return@launch
                                     }
                                     

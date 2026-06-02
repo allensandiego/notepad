@@ -18,8 +18,7 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+
 import java.io.File
 import java.net.URI
 import java.sql.DriverManager
@@ -34,16 +33,16 @@ class SupabaseClient(private val context: Context) {
     )
 
     fun getSupabaseUrl(): String = sharedPrefs.getString("url", "") ?: ""
-    fun getSupabaseAnonKey(): String = sharedPrefs.getString("anon_key", "") ?: ""
+    fun getSupabaseApiKey(): String = sharedPrefs.getString("api_key", "") ?: ""
 
-    fun saveCredentials(url: String, anonKey: String): Boolean {
+    fun saveCredentials(url: String, apiKey: String): Boolean {
         val trimmedUrl = url.trim()
-        val trimmedKey = anonKey.trim()
+        val trimmedKey = apiKey.trim()
 
         if (trimmedUrl.isBlank() || trimmedKey.isBlank()) {
             sharedPrefs.edit()
                 .putString("url", "")
-                .putString("anon_key", "")
+                .putString("api_key", "")
                 .apply()
             return true
         }
@@ -54,36 +53,15 @@ class SupabaseClient(private val context: Context) {
 
         sharedPrefs.edit()
             .putString("url", trimmedUrl.removeSuffix("/"))
-            .putString("anon_key", trimmedKey)
+            .putString("api_key", trimmedKey)
             .apply()
         return true
     }
 
-    fun extractUrlFromJwt(jwt: String): String? {
-        return try {
-            val parts = jwt.split(".")
-            if (parts.size < 2) return null
-            val payloadEncoded = parts[1]
-            val decodedBytes = java.util.Base64.getUrlDecoder().decode(payloadEncoded)
-            val decodedString = String(decodedBytes, Charsets.UTF_8)
-            val jsonElement = Json.parseToJsonElement(decodedString)
-            val iss = jsonElement.jsonObject["iss"]?.jsonPrimitive?.content ?: return null
-            var baseUrl = iss.trim()
-            if (baseUrl.endsWith("/auth/v1")) {
-                baseUrl = baseUrl.removeSuffix("/auth/v1")
-            } else if (baseUrl.endsWith("/auth/v1/")) {
-                baseUrl = baseUrl.removeSuffix("/auth/v1/")
-            }
-            baseUrl
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Bugsnag.notify(e)
-            null
-        }
-    }
+
 
     fun isConfigured(): Boolean {
-        return getSupabaseUrl().isNotEmpty() && getSupabaseAnonKey().isNotEmpty()
+        return getSupabaseUrl().isNotEmpty() && getSupabaseApiKey().isNotEmpty()
     }
 
     suspend fun testConnection(): Boolean {
@@ -184,9 +162,7 @@ class SupabaseClient(private val context: Context) {
     }
 
     private fun getBaseHeaders(builder: io.ktor.client.request.HttpRequestBuilder) {
-        val key = getSupabaseAnonKey()
-        builder.header("apikey", key)
-        builder.header("Authorization", "Bearer $key")
+        builder.header("apikey", getSupabaseApiKey())
     }
 
     // --- PostgREST DB Operations ---
