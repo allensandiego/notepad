@@ -193,12 +193,12 @@ fun ConnectionScreen(
 
                     val uriHandler = LocalUriHandler.current
                     Text(
-                        text = "\uD83D\uDE80 One-Click Supabase Database Setup",
+                        text = "\uD83D\uDE80 Create New Supabase Project",
                         color = AccentMint,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .clickable { uriHandler.openUri("https://supabase.com/dashboard/new?repository=https://github.com/allensandiego/notepad") }
+                            .clickable { uriHandler.openUri("https://database.new") }
                             .padding(vertical = 4.dp)
                     )
 
