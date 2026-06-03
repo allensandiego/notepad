@@ -54,16 +54,6 @@ android {
         compose = true
         buildConfig = true
     }
-
-    testOptions {
-        unitTests.all {
-            // Exclude integration tests by default (needs credentials)
-            // Pass -PincludeIT on command line to include them
-            if (!project.hasProperty("includeIT")) {
-                setExcludes(listOf("**/SupabaseIntegrationTest*"))
-            }
-        }
-    }
 }
 
 dependencies {
