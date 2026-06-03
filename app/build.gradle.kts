@@ -54,6 +54,15 @@ android {
         compose = true
         buildConfig = true
     }
+
+    testOptions {
+        unitTests.all {
+            // Exclude SupabaseIntegrationTest by default (needs network credentials)
+            filter {
+                excludeTestsMatching("com.allensandiego.notepad.SupabaseIntegrationTest")
+            }
+        }
+    }
 }
 
 dependencies {

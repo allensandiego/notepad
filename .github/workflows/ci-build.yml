@@ -34,7 +34,6 @@ jobs:
         run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Run Unit Tests
-        continue-on-error: true
         run: ./gradlew :app:testDebugUnitTest --stacktrace
 
       - name: Upload APK (debug)
