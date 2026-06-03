@@ -20,9 +20,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 import java.io.File
-import java.net.URI
-import java.sql.DriverManager
-import java.util.Properties
 import com.bugsnag.android.Bugsnag
 
 class SupabaseClient(private val context: Context) {
@@ -80,82 +77,20 @@ class SupabaseClient(private val context: Context) {
         }
     }
 
-    private fun getDbHost(): String {
-        val url = getSupabaseUrl()
+    /**
+     * Checks if the required database tables exist by querying the REST API.
+     * Returns true if the tables are accessible, false if they return 404 or error.
+     */
+    suspend fun tablesExist(): Boolean {
+        if (!isConfigured()) return false
         return try {
-            val uri = URI(url)
-            val host = uri.host ?: return ""
-            // Supabase direct DB connections require the db. subdomain prefix
-            // e.g. kbabpyjwqxsipgtemtne.supabase.co -> db.kbabpyjwqxsipgtemtne.supabase.co
-            if (host.endsWith(".supabase.co") && !host.startsWith("db.")) {
-                "db.$host"
-            } else {
-                host
+            val url = "${getSupabaseUrl()}/rest/v1/custom_tables?select=id&limit=0"
+            val response: HttpResponse = client.get(url) {
+                getBaseHeaders(this)
             }
+            response.status.isSuccess()
         } catch (e: Exception) {
-            ""
-        }
-    }
-
-    suspend fun initializeDatabaseSchema(password: String): String? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-        val dbHost = getDbHost()
-        if (dbHost.isEmpty()) return@withContext "Could not determine database host from URL."
-        val connectionUrl = "jdbc:postgresql://$dbHost:5432/postgres?ssl=true&sslmode=require"
-        
-        return@withContext try {
-            Class.forName("org.postgresql.Driver")
-            val props = Properties()
-            props.setProperty("user", "postgres")
-            props.setProperty("password", password)
-            
-            DriverManager.getConnection(connectionUrl, props).use { conn ->
-                conn.createStatement().use { stmt ->
-                    val sql = """
-                        CREATE TABLE IF NOT EXISTS custom_tables (
-                            id TEXT PRIMARY KEY,
-                            name TEXT NOT NULL UNIQUE,
-                            parent_table_id TEXT REFERENCES custom_tables(id) ON DELETE CASCADE,
-                            created_at BIGINT NOT NULL
-                        );
-
-                        CREATE TABLE IF NOT EXISTS custom_fields (
-                            id TEXT PRIMARY KEY,
-                            table_id TEXT NOT NULL REFERENCES custom_tables(id) ON DELETE CASCADE,
-                            name TEXT NOT NULL,
-                            type TEXT NOT NULL,
-                            required BOOLEAN NOT NULL,
-                            default_value TEXT,
-                            default_type TEXT,
-                            is_system BOOLEAN NOT NULL DEFAULT FALSE
-                        );
-
-                        CREATE TABLE IF NOT EXISTS custom_records (
-                            id TEXT PRIMARY KEY,
-                            table_id TEXT NOT NULL REFERENCES custom_tables(id) ON DELETE CASCADE,
-                            created_at BIGINT NOT NULL
-                        );
-
-                        CREATE TABLE IF NOT EXISTS custom_values (
-                            id TEXT PRIMARY KEY,
-                            record_id TEXT NOT NULL REFERENCES custom_records(id) ON DELETE CASCADE,
-                            field_id TEXT NOT NULL REFERENCES custom_fields(id) ON DELETE CASCADE,
-                            value_text TEXT,
-                            UNIQUE(record_id, field_id)
-                        );
-
-                        ALTER TABLE custom_tables DISABLE ROW LEVEL SECURITY;
-                        ALTER TABLE custom_fields DISABLE ROW LEVEL SECURITY;
-                        ALTER TABLE custom_records DISABLE ROW LEVEL SECURITY;
-                        ALTER TABLE custom_values DISABLE ROW LEVEL SECURITY;
-                    """.trimIndent()
-                    stmt.execute(sql)
-                }
-            }
-            null // success
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Bugsnag.notify(e)
-            e.message ?: "Unknown database error"
+            false
         }
     }
 

@@ -21,7 +21,6 @@ class SupabaseIntegrationTest {
     private lateinit var editor: SharedPreferences.Editor
     private val prefsMap = HashMap<String, String>()
 
-    private var dbPassword = ""
     private var supabaseUrl = ""
     private var supabaseApiKey = ""
 
@@ -37,14 +36,12 @@ class SupabaseIntegrationTest {
                 val key = parts[0].trim()
                 val value = parts[1].trim()
                 when (key) {
-                    "DATABASE_PASSWORD" -> dbPassword = value
                     "URL" -> supabaseUrl = value
                     "API_KEY" -> supabaseApiKey = value
                 }
             }
         }
 
-        assertTrue("DATABASE_PASSWORD is empty in env.example", dbPassword.isNotEmpty())
         assertTrue("URL is empty in env.example", supabaseUrl.isNotEmpty())
         assertTrue("API_KEY is empty in env.example", supabaseApiKey.isNotEmpty())
 
@@ -88,33 +85,6 @@ class SupabaseIntegrationTest {
         return null
     }
 
-    private fun getDbHost(url: String): String {
-        return try {
-            val uri = java.net.URI(url)
-            val host = uri.host ?: ""
-            if (host.endsWith(".supabase.co") || host.endsWith(".supabase.net")) {
-                "db.$host"
-            } else {
-                host
-            }
-        } catch (e: Exception) {
-            ""
-        }
-    }
-
-    private fun isPortReachable(host: String, port: Int, timeoutMs: Int): Boolean {
-        if (host.isEmpty()) return false
-        return try {
-            java.net.Socket().use { socket ->
-                socket.connect(java.net.InetSocketAddress(host, port), timeoutMs)
-            }
-            true
-        } catch (e: Exception) {
-            println("Port check failed for $host:$port -> ${e.message}")
-            false
-        }
-    }
-
     @Test
     fun testSupabaseConnectionAndSchemaInit() = runBlocking {
         val client = SupabaseClient(context)
@@ -131,16 +101,9 @@ class SupabaseIntegrationTest {
         println("=== Test Connection Result: ${apiConnected} ===")
         assertTrue("Failed to connect to Supabase REST API", apiConnected)
 
-        // Check if port 5432 is reachable before direct DB operations
-        val dbHost = getDbHost(supabaseUrl)
-        if (!isPortReachable(dbHost, 5432, 2000)) {
-            println("WARNING: Port 5432 is unreachable on $dbHost. Skipping direct JDBC schema init and PostgREST table tests.")
-            return@runBlocking
-        }
-
-        // 3. Test Database Schema Auto-Initialization via PostgreSQL JDBC
-        val schemaInitialized = client.initializeDatabaseSchema(dbPassword)
-        assertTrue("Failed to initialize database schema via direct JDBC connection", schemaInitialized)
+        // 3. Verify tables exist via REST API
+        val tables = client.tablesExist()
+        assertTrue("Database tables not found. Run the setup SQL in the Supabase Dashboard first.", tables)
 
         // 4. Test Table Ops (Ping check to make sure table is queryable over REST)
         val tableUpserted = client.upsertTable("test_ping", "Test Ping Table", null, System.currentTimeMillis())

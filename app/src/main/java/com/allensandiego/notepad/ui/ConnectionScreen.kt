@@ -80,9 +80,7 @@ fun ConnectionScreen(
 
     var supabaseUrl by remember { mutableStateOf(supabaseClient.getSupabaseUrl()) }
     var apiKey by remember { mutableStateOf(supabaseClient.getSupabaseApiKey()) }
-    var dbPassword by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
-    var showDbPassword by remember { mutableStateOf(false) }
     var isTesting by remember { mutableStateOf(false) }
     var testMessage by remember { mutableStateOf("") }
     var testSuccess by remember { mutableStateOf<Boolean?>(null) }
@@ -127,7 +125,7 @@ fun ConnectionScreen(
             )
 
             Text(
-                text = "Connect to your personal Supabase instance by entering your Project URL and Publishable API Key. Provide your Database Password to automatically configure all remote tables.",
+                text = "Connect to your personal Supabase instance by entering your Project URL and Publishable API Key.",
                 fontSize = 14.sp,
                 color = TextMuted,
                 modifier = Modifier.padding(bottom = 32.dp),
@@ -191,40 +189,11 @@ fun ConnectionScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    OutlinedTextField(
-                        value = dbPassword,
-                        onValueChange = { dbPassword = it },
-                        label = { Text("Database Password (for auto-setup)", color = TextMuted) },
-                        placeholder = { Text("Required if tables are not set up yet", color = TextMuted.copy(alpha = 0.5f)) },
-                        singleLine = true,
-                        visualTransformation = if (showDbPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(onClick = { showDbPassword = !showDbPassword }) {
-                                Icon(
-                                    imageVector = if (showDbPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                    contentDescription = if (showDbPassword) "Hide password" else "Show password",
-                                    tint = TextMuted
-                                )
-                            }
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = PrimaryEmerald,
-                            unfocusedBorderColor = TextMuted.copy(alpha = 0.3f),
-                            focusedLabelColor = AccentMint,
-                            unfocusedLabelColor = TextMuted,
-                            focusedTextColor = TextLight,
-                            unfocusedTextColor = TextLight
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
                     Spacer(modifier = Modifier.height(12.dp))
 
                     val uriHandler = LocalUriHandler.current
                     Text(
-                        text = "🚀 One-Click Supabase Database Setup",
+                        text = "\uD83D\uDE80 One-Click Supabase Database Setup",
                         color = AccentMint,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
@@ -283,31 +252,18 @@ fun ConnectionScreen(
                                         return@launch
                                     }
                                     
-                                    if (dbPassword.isNotEmpty()) {
-                                        testMessage = "Configuring database tables..."
-                                        val error = supabaseClient.initializeDatabaseSchema(dbPassword)
-                                        if (error != null) {
-                                            isTesting = false
-                                            testSuccess = false
-                                            testMessage = "Database setup failed: $error"
-                                            return@launch
-                                        }
-                                    } else {
-                                        testMessage = "Verifying database tables..."
-                                        val tablesExist = supabaseClient.upsertTable("ping", "Connection Probe", null, System.currentTimeMillis())
-                                        if (tablesExist) {
-                                            supabaseClient.deleteTable("ping")
-                                        } else {
-                                            isTesting = false
-                                            testSuccess = false
-                                            testMessage = "Tables not found. Enter Database Password to automatically create them."
-                                            return@launch
-                                        }
+                                    testMessage = "Verifying database tables..."
+                                    val tables = supabaseClient.tablesExist()
+                                    if (!tables) {
+                                        isTesting = false
+                                        testSuccess = false
+                                        testMessage = "Tables not found. Use \"One-Click Setup\" or run the SQL from \"Show Setup SQL\" in your Supabase Dashboard."
+                                        return@launch
                                     }
                                     
                                     isTesting = false
                                     testSuccess = true
-                                    testMessage = "Connected and initialized successfully!"
+                                    testMessage = "Connected successfully!"
                                     onConnected()
                                 }
                             } else {

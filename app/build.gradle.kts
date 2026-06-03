@@ -26,8 +26,8 @@ android {
         applicationId = "com.allensandiego.notepad"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10
-        versionName = "1.0.3"
+        versionCode = 11
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["bugsnagApiKey"] = bugsnagApiKey
@@ -81,8 +81,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
 
-    // PostgreSQL JDBC Driver
-    implementation(libs.postgresql)
+
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
