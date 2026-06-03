@@ -57,10 +57,7 @@ android {
 
     testOptions {
         unitTests.all {
-            // Exclude SupabaseIntegrationTest by default (needs network credentials)
-            filter {
-                excludeTestsMatching("com.allensandiego.notepad.SupabaseIntegrationTest")
-            }
+            exclude("com.allensandiego.notepad.SupabaseIntegrationTest")
         }
     }
 }
