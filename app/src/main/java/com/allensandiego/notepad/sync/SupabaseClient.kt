@@ -84,15 +84,22 @@ class SupabaseClient(private val context: Context) {
         val url = getSupabaseUrl()
         return try {
             val uri = URI(url)
-            uri.host ?: ""
+            val host = uri.host ?: return ""
+            // Supabase direct DB connections require the db. subdomain prefix
+            // e.g. kbabpyjwqxsipgtemtne.supabase.co -> db.kbabpyjwqxsipgtemtne.supabase.co
+            if (host.endsWith(".supabase.co") && !host.startsWith("db.")) {
+                "db.$host"
+            } else {
+                host
+            }
         } catch (e: Exception) {
             ""
         }
     }
 
-    suspend fun initializeDatabaseSchema(password: String): Boolean = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+    suspend fun initializeDatabaseSchema(password: String): String? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
         val dbHost = getDbHost()
-        if (dbHost.isEmpty()) return@withContext false
+        if (dbHost.isEmpty()) return@withContext "Could not determine database host from URL."
         val connectionUrl = "jdbc:postgresql://$dbHost:5432/postgres?ssl=true&sslmode=require"
         
         return@withContext try {
@@ -144,11 +151,11 @@ class SupabaseClient(private val context: Context) {
                     stmt.execute(sql)
                 }
             }
-            true
+            null // success
         } catch (e: Exception) {
             e.printStackTrace()
             Bugsnag.notify(e)
-            false
+            e.message ?: "Unknown database error"
         }
     }
 

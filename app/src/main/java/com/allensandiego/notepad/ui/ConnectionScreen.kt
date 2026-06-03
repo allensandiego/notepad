@@ -104,6 +104,7 @@ fun ConnectionScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -284,11 +285,11 @@ fun ConnectionScreen(
                                     
                                     if (dbPassword.isNotEmpty()) {
                                         testMessage = "Configuring database tables..."
-                                        val initialized = supabaseClient.initializeDatabaseSchema(dbPassword)
-                                        if (!initialized) {
+                                        val error = supabaseClient.initializeDatabaseSchema(dbPassword)
+                                        if (error != null) {
                                             isTesting = false
                                             testSuccess = false
-                                            testMessage = "Database setup failed. Verify your Database Password."
+                                            testMessage = "Database setup failed: $error"
                                             return@launch
                                         }
                                     } else {
