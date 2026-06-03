@@ -11,7 +11,9 @@ import androidx.lifecycle.lifecycleScope
 import com.allensandiego.notepad.db.NotepadDatabase
 import com.allensandiego.notepad.sync.SupabaseClient
 import com.allensandiego.notepad.sync.SyncEngine
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.bugsnag.android.Bugsnag
 import com.bugsnag.android.BreadcrumbType
 
@@ -35,8 +37,10 @@ class MainActivity : ComponentActivity() {
 
         // Automatically trigger sync on application launch in background
         lifecycleScope.launch {
-            if (supabaseClient.isConfigured()) {
-                syncEngine.triggerSync()
+            withContext(Dispatchers.IO) {
+                if (supabaseClient.isConfigured()) {
+                    syncEngine.triggerSync()
+                }
             }
         }
 

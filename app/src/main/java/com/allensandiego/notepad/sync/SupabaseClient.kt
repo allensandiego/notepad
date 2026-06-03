@@ -94,12 +94,14 @@ class SupabaseClient(private val context: Context) {
         }
     }
 
-    private val client = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                encodeDefaults = true
-            })
+    private val client by lazy {
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    encodeDefaults = true
+                })
+            }
         }
     }
 

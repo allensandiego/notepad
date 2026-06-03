@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
@@ -14,6 +15,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import java.io.File
 
+@Ignore("Needs Supabase credentials — run manually with env.example populated")
 class SupabaseIntegrationTest {
 
     private lateinit var context: Context
