@@ -54,12 +54,6 @@ android {
         compose = true
         buildConfig = true
     }
-
-    testOptions {
-        unitTests.all {
-            exclude("**/SupabaseIntegrationTest.*")
-        }
-    }
 }
 
 dependencies {

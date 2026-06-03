@@ -36,7 +36,8 @@ jobs:
       - name: Run Unit Tests
         run: |
           ./gradlew :app:testDebugUnitTest --stacktrace \
-            -Pandroid.injected.testFilter='!com.allensandiego.notepad.SupabaseIntegrationTest'
+            --tests "com.allensandiego.notepad.*" \
+            --tests "!com.allensandiego.notepad.SupabaseIntegrationTest"
 
       - name: Upload APK (debug)
         uses: actions/upload-artifact@v4
