@@ -57,7 +57,7 @@ android {
 
     testOptions {
         unitTests.all {
-            exclude("com.allensandiego.notepad.SupabaseIntegrationTest")
+            exclude("**/SupabaseIntegrationTest.*")
         }
     }
 }
