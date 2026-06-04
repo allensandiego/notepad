@@ -256,8 +256,8 @@ fun RecordCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             fields.forEach { field ->
-                // Hide the system PK field (id) from record cards
-                if (field.isSystem && field.name == "id") return@forEach
+                // Hide system fields (PK and FK) from record cards
+                if (field.isSystem) return@forEach
 
                 val valueObj = values.find { it.fieldId == field.id }
                 val rawValue = valueObj?.valueText ?: ""

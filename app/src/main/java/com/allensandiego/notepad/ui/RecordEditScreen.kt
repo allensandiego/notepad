@@ -524,7 +524,7 @@ fun RecordEditContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(fields) { field ->
-                    if (field.isSystem && field.name == "id") return@items
+                    if (field.isSystem) return@items
 
                     val currentValue = formValues[field.id] ?: ""
 

@@ -222,8 +222,8 @@ fun CreateCollectionDialog(
                                         table = newTable,
                                         allTables = databaseDao.getAllTables()
                                     )
+                                    onDismiss()
                                 }
-                                onDismiss()
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryEmerald)
@@ -317,7 +317,7 @@ fun FieldDesignerDialog(
                         .weight(1f)
                         .fillMaxWidth()
                 ) {
-                    if (allFields.isEmpty()) {
+                    if (userFields.isEmpty()) {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -339,18 +339,7 @@ fun FieldDesignerDialog(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // System fields (PK / FK) — locked, shown first
-                            items(systemFields) { field ->
-                                FieldRow(
-                                    field = field,
-                                    isSystem = true,
-                                    containerColor = SecondaryNavy,
-                                    textLight = TextLight,
-                                    textMuted = TextMuted,
-                                    onDelete = null // system fields cannot be deleted
-                                )
-                            }
-                            // User-defined fields
+                            // User-defined fields (PK and FK system fields are hidden)
                             items(userFields) { field ->
                                 FieldRow(
                                     field = field,
@@ -534,8 +523,8 @@ fun FieldDesignerDialog(
                                             table = newChild,
                                             allTables = databaseDao.getAllTables()
                                         )
+                                        showAddChildDialog = false
                                     }
-                                    showAddChildDialog = false
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = PrimaryEmerald)
