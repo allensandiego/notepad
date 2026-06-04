@@ -54,6 +54,7 @@ import android.content.Context
 import android.content.ClipboardManager
 import android.content.ClipData
 import com.allensandiego.notepad.sync.SupabaseClient
+import com.allensandiego.notepad.sync.SyncEngine
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.LaunchedEffect
 import com.bugsnag.android.Bugsnag
@@ -65,6 +66,7 @@ import androidx.compose.material3.MaterialTheme
 @Composable
 fun ConnectionScreen(
     supabaseClient: SupabaseClient,
+    syncEngine: SyncEngine,
     onConnected: () -> Unit
 ) {
     LaunchedEffect(Unit) {
@@ -284,9 +286,17 @@ fun ConnectionScreen(
                                         return@launch
                                     }
                                     
+                                    testMessage = "Connected! Syncing offline backlog..."
+                                    val syncSuccess = syncEngine.triggerSync()
                                     isTesting = false
                                     testSuccess = true
-                                    testMessage = "Connected successfully!"
+                                    if (syncSuccess) {
+                                        testMessage = "Connected & Synced successfully!"
+                                    } else {
+                                        testMessage = "Connected! Offline queue will retry in background."
+                                    }
+                                    // Give the user a brief moment (500ms) to see the success/sync status before dismissing
+                                    kotlinx.coroutines.delay(500)
                                     onConnected()
                                 }
                             } else {

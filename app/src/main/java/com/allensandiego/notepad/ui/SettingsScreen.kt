@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.allensandiego.notepad.sync.SupabaseClient
+import com.allensandiego.notepad.sync.SyncEngine
 import com.allensandiego.notepad.ui.theme.ThemePreference
 import com.allensandiego.notepad.ui.theme.setThemePreference
 import com.bugsnag.android.Bugsnag
@@ -64,6 +65,7 @@ import com.bugsnag.android.BreadcrumbType
 @Composable
 fun SettingsScreen(
     supabaseClient: SupabaseClient,
+    syncEngine: SyncEngine,
     currentTheme: ThemePreference,
     onThemeChanged: (ThemePreference) -> Unit,
     onBack: () -> Unit
@@ -299,6 +301,7 @@ fun SettingsScreen(
             ) {
                 ConnectionScreen(
                     supabaseClient = supabaseClient,
+                    syncEngine = syncEngine,
                     onConnected = { showConnectionDialog = false }
                 )
                 

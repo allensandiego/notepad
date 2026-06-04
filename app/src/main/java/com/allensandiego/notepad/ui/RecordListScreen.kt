@@ -63,6 +63,7 @@ import com.allensandiego.notepad.sync.SyncEngine
 import kotlinx.coroutines.launch
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +86,7 @@ fun RecordListContent(
     val recordValuesMap = remember { mutableStateMapOf<String, List<ValueEntity>>() }
     var searchQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
 
     LaunchedEffect(records) {
         records.forEach { record ->
@@ -126,47 +128,58 @@ fun RecordListContent(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        if (filteredRecords.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = if (searchQuery.isNotEmpty()) "No matching records found" else "No records yet.\nTap + to add a record.",
-                    color = TextMuted,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    fontSize = 14.sp
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(filteredRecords) { record ->
-                    val values = recordValuesMap[record.id] ?: emptyList()
-                    RecordCard(
-                        record = record,
-                        fields = fields,
-                        values = values,
-                        onCardClick = { onEditRecord(record.id) },
-                        onDelete = {
-                            scope.launch {
-                                databaseDao.deleteRecord(record.id)
-                                val payload = "{\"id\":\"${record.id}\",\"table_id\":\"${record.tableId}\",\"created_at\":${record.createdAt}}"
-                                syncEngine.queueItem("DELETE", "RECORD", payload)
-                            }
-                        },
-                        databaseDao = databaseDao
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                scope.launch {
+                    syncEngine.triggerSync()
+                    isRefreshing = false
+                }
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+        ) {
+            if (filteredRecords.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (searchQuery.isNotEmpty()) "No matching records found" else "No records yet.\nTap + to add a record.",
+                        color = TextMuted,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        fontSize = 14.sp
                     )
                 }
-                item {
-                    NativeAdCard(modifier = Modifier.padding(top = 8.dp))
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(filteredRecords) { record ->
+                        val values = recordValuesMap[record.id] ?: emptyList()
+                        RecordCard(
+                            record = record,
+                            fields = fields,
+                            values = values,
+                            onCardClick = { onEditRecord(record.id) },
+                            onDelete = {
+                                scope.launch {
+                                    databaseDao.deleteRecord(record.id)
+                                    val payload = "{\"id\":\"${record.id}\",\"table_id\":\"${record.tableId}\",\"created_at\":${record.createdAt}}"
+                                    syncEngine.queueItem("DELETE", "RECORD", payload)
+                                }
+                            },
+                            databaseDao = databaseDao
+                        )
+                    }
+                    item {
+                        NativeAdCard(modifier = Modifier.padding(top = 8.dp))
+                    }
                 }
             }
         }

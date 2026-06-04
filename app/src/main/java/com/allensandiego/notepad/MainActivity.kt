@@ -54,6 +54,7 @@ class MainActivity : ComponentActivity() {
                 if (isSettingsOpen) {
                     SettingsScreen(
                         supabaseClient = supabaseClient,
+                        syncEngine = syncEngine,
                         currentTheme = currentTheme,
                         onThemeChanged = { currentTheme = it },
                         onBack = { isSettingsOpen = false }
