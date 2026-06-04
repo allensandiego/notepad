@@ -193,7 +193,7 @@ fun ConnectionScreen(
 
                     val uriHandler = LocalUriHandler.current
                     Text(
-                        text = "\uD83D\uDE80 Create New Supabase Project",
+                        text = "\uD83D\uDE80 One-Click Supabase Setup",
                         color = AccentMint,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,

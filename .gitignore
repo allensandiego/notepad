@@ -55,3 +55,6 @@ view.xml
 # Supabase CLI
 supabase/.temp/
 supabase/.branches/
+
+.wrangler/
+

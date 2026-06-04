@@ -2,7 +2,7 @@
 
 A privacy-first, offline-ready Android application that empowers users to build custom relational tables, manage records locally using SQLite/Room, and seamlessly sync data in real-time to their own Supabase or self-hosted PostgreSQL database.
 
----
+
 
 ## 🚀 Key Features
 
@@ -55,13 +55,29 @@ A privacy-first, offline-ready Android application that empowers users to build 
 ## ⚙️ Setup & Configuration
 
 ### 1. Supabase Backend Setup
-To enable sync, set up a Supabase project and create the SQL schema. The app provides a direct database connection tool to automatically initialize the schema using a PostgreSQL JDBC driver.
 
-The database uses the following schemas:
+To enable sync and user file attachments, configure your Supabase backend:
+
+1. **Create a Project**: Create a new project at [supabase.com](https://supabase.com).
+2. **Execute Schema SQL**:
+   In the Supabase Dashboard, open the **SQL Editor**, create a new query, copy-paste the entire contents of [setup.sql](supabase/setup.sql), and click **Run**.
+3. **Get API Credentials**:
+   Go to **Project Settings -> API** and copy:
+   *   `Project URL`
+   *   `anon public` API Key
+4. **Configure Mobile App**:
+   Launch the Android app, go to the connection setup screen, and paste these credentials.
+
+#### Database Tables Created:
+*   `public.profiles`: Auto-created on user signup via an `auth.users` trigger.
 *   `custom_tables`: Declares collections and hierarchical parent relationships.
 *   `custom_fields`: Defines schema field types, constraints, defaults, and system flags.
 *   `custom_records`: Stores individual record metadata.
 *   `custom_values`: Relates record values back to fields.
+
+#### Storage Buckets Provisioned:
+*   `user-uploads`: Public bucket for files/attachments with path-level RLS. Anyone can read, but authenticated users can only write/modify files in their own folder (`user-uploads/<user_uuid>/...`).
+*   `attachments`: App default media storage bucket.
 
 ### 2. Bugsnag Setup
 To receive crash telemetry and performance metrics:
