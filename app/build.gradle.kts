@@ -26,7 +26,7 @@ android {
         applicationId = "com.allensandiego.notepad"
         minSdk = 26
         targetSdk = 36
-        versionCode = 12
+        versionCode = 13
         versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
