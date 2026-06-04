@@ -64,6 +64,9 @@ import kotlinx.coroutines.launch
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +82,7 @@ fun RecordListContent(
     val SurfaceDark = MaterialTheme.colorScheme.surface
     val TextLight = MaterialTheme.colorScheme.onSurface
     val TextMuted = MaterialTheme.colorScheme.onSurfaceVariant
+    val context = LocalContext.current
 
     val records by databaseDao.getRecordsForTableFlow(table.id).collectAsState(initial = emptyList())
     val fields by databaseDao.getFieldsForTableFlow(table.id).collectAsState(initial = emptyList())
@@ -133,8 +137,21 @@ fun RecordListContent(
             onRefresh = {
                 isRefreshing = true
                 scope.launch {
-                    syncEngine.triggerSync()
+                    val startTime = System.currentTimeMillis()
+                    val syncSuccess = syncEngine.triggerSync()
+                    val duration = System.currentTimeMillis() - startTime
+                    
+                    // Keep the spinner visible for at least 800ms for a smooth animation feel
+                    if (duration < 800) {
+                        kotlinx.coroutines.delay(800 - duration)
+                    }
                     isRefreshing = false
+
+                    if (syncSuccess) {
+                        Toast.makeText(context, "Sync completed successfully!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Sync completed with offline status.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             },
             modifier = Modifier
@@ -143,7 +160,9 @@ fun RecordListContent(
         ) {
             if (filteredRecords.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

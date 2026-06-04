@@ -26,8 +26,8 @@ android {
         applicationId = "com.allensandiego.notepad"
         minSdk = 26
         targetSdk = 36
-        versionCode = 15
-        versionName = "1.0.7"
+        versionCode = 16
+        versionName = "1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["bugsnagApiKey"] = bugsnagApiKey
