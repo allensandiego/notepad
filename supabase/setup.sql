@@ -180,9 +180,6 @@ ON CONFLICT (id) DO NOTHING;
 -- SECTION 5: Row-Level Security on storage.objects
 -- -----------------------------------------------------------------------------
 
--- Enable RLS on storage.objects to apply policies.
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
 -- --- Policies for 'user-uploads' bucket ---
 
 -- Anyone can download/view files in user-uploads.
