@@ -442,10 +442,14 @@ fun RecordEditContent(
                                 createdAt = if (isNew) System.currentTimeMillis() else (databaseDao.getRecordById(currentRecordId)?.createdAt ?: System.currentTimeMillis())
                             )
                             
+                            val existingValues = databaseDao.getValuesForRecord(currentRecordId)
+                            val existingValuesMap = existingValues.associateBy { it.fieldId }
+
                             val values = fields.map { field ->
                                 val valText = formValues[field.id] ?: ""
+                                val existingId = existingValuesMap[field.id]?.id
                                 ValueEntity(
-                                    id = UUID.randomUUID().toString(),
+                                    id = existingId ?: UUID.randomUUID().toString(),
                                     recordId = currentRecordId,
                                     fieldId = field.id,
                                     valueText = valText

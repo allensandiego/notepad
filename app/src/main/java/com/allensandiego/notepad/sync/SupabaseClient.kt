@@ -21,6 +21,11 @@ import kotlinx.serialization.json.Json
 
 import java.io.File
 import com.bugsnag.android.Bugsnag
+import io.ktor.client.call.body
+import com.allensandiego.notepad.db.TableEntity
+import com.allensandiego.notepad.db.FieldEntity
+import com.allensandiego.notepad.db.RecordEntity
+import com.allensandiego.notepad.db.ValueEntity
 
 class SupabaseClient(private val context: Context) {
 
@@ -274,6 +279,82 @@ class SupabaseClient(private val context: Context) {
             null
         }
     }
+
+    suspend fun fetchAllTables(): List<TablePayload>? {
+        if (!isConfigured()) return null
+        return try {
+            val url = "${getSupabaseUrl()}/rest/v1/custom_tables?select=*"
+            val response: HttpResponse = client.get(url) {
+                getBaseHeaders(this)
+            }
+            if (response.status.isSuccess()) {
+                response.body()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Bugsnag.notify(e)
+            null
+        }
+    }
+
+    suspend fun fetchAllFields(): List<FieldPayload>? {
+        if (!isConfigured()) return null
+        return try {
+            val url = "${getSupabaseUrl()}/rest/v1/custom_fields?select=*"
+            val response: HttpResponse = client.get(url) {
+                getBaseHeaders(this)
+            }
+            if (response.status.isSuccess()) {
+                response.body()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Bugsnag.notify(e)
+            null
+        }
+    }
+
+    suspend fun fetchAllRecords(): List<RecordPayload>? {
+        if (!isConfigured()) return null
+        return try {
+            val url = "${getSupabaseUrl()}/rest/v1/custom_records?select=*"
+            val response: HttpResponse = client.get(url) {
+                getBaseHeaders(this)
+            }
+            if (response.status.isSuccess()) {
+                response.body()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Bugsnag.notify(e)
+            null
+        }
+    }
+
+    suspend fun fetchAllValues(): List<ValuePayload>? {
+        if (!isConfigured()) return null
+        return try {
+            val url = "${getSupabaseUrl()}/rest/v1/custom_values?select=*"
+            val response: HttpResponse = client.get(url) {
+                getBaseHeaders(this)
+            }
+            if (response.status.isSuccess()) {
+                response.body()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Bugsnag.notify(e)
+            null
+        }
+    }
 }
 
 // --- Serializable DTOs for Supabase Payload ---
@@ -312,3 +393,8 @@ data class ValuePayload(
     val field_id: String,
     val value_text: String?
 )
+
+fun TablePayload.toEntity() = TableEntity(id, name, parent_table_id, created_at)
+fun FieldPayload.toEntity() = FieldEntity(id, table_id, name, type, required, default_value, default_type, is_system)
+fun RecordPayload.toEntity() = RecordEntity(id, table_id, created_at)
+fun ValuePayload.toEntity() = ValueEntity(id, record_id, field_id, value_text)

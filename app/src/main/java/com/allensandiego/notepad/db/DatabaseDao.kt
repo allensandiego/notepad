@@ -118,4 +118,48 @@ interface DatabaseDao {
 
     @Query("DELETE FROM sync_queue")
     suspend fun clearSyncQueue()
+
+    @Query("DELETE FROM custom_values WHERE id = :valueId")
+    suspend fun deleteValue(valueId: String)
+
+    @Query("SELECT * FROM custom_fields")
+    suspend fun getAllFields(): List<FieldEntity>
+
+    @Query("SELECT * FROM custom_records")
+    suspend fun getAllRecords(): List<RecordEntity>
+
+    @Query("SELECT * FROM custom_values")
+    suspend fun getAllValues(): List<ValueEntity>
+
+    @Query("DELETE FROM custom_tables")
+    suspend fun deleteAllTables()
+
+    @Query("DELETE FROM custom_fields")
+    suspend fun deleteAllFields()
+
+    @Query("DELETE FROM custom_records")
+    suspend fun deleteAllRecords()
+
+    @Query("DELETE FROM custom_values")
+    suspend fun deleteAllValues()
+
+    @Transaction
+    suspend fun syncDatabaseState(
+        remoteTables: List<TableEntity>,
+        remoteFields: List<FieldEntity>,
+        remoteRecords: List<RecordEntity>,
+        remoteValues: List<ValueEntity>
+    ) {
+        // Clear all tables in reverse dependency order to satisfy foreign keys
+        deleteAllValues()
+        deleteAllRecords()
+        deleteAllFields()
+        deleteAllTables()
+
+        // Re-populate all tables with remote data in dependency order
+        remoteTables.forEach { insertTable(it) }
+        remoteFields.forEach { insertField(it) }
+        remoteRecords.forEach { insertRecord(it) }
+        remoteValues.forEach { insertValue(it) }
+    }
 }

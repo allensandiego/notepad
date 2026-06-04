@@ -50,17 +50,31 @@ class SyncEngine(
         if (!isOnline() || !supabaseClient.isConfigured()) return@withContext false
 
         mutex.withLock {
+            // 1. PUSH: Process any outstanding local actions in the queue
             val queue = databaseDao.getSyncQueue()
-            if (queue.isEmpty()) return@withContext true
-
             for (item in queue) {
                 val success = processSyncItem(item)
                 if (success) {
                     databaseDao.deleteSyncItem(item.id)
                 } else {
+                    // Stop sync if any queued item fails to push to prevent out-of-order execution
                     return@withContext false
                 }
             }
+
+            // 2. PULL & MERGE: Retrieve the entire state from Supabase
+            val remoteTables = supabaseClient.fetchAllTables() ?: return@withContext false
+            val remoteFields = supabaseClient.fetchAllFields() ?: return@withContext false
+            val remoteRecords = supabaseClient.fetchAllRecords() ?: return@withContext false
+            val remoteValues = supabaseClient.fetchAllValues() ?: return@withContext false
+
+            databaseDao.syncDatabaseState(
+                remoteTables = remoteTables.map { it.toEntity() },
+                remoteFields = remoteFields.map { it.toEntity() },
+                remoteRecords = remoteRecords.map { it.toEntity() },
+                remoteValues = remoteValues.map { it.toEntity() }
+            )
+
             return@withContext true
         }
     }
