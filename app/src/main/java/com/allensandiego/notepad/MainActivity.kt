@@ -46,7 +46,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var currentTheme by remember {
-                mutableStateOf(getThemePreference(this@MainActivity))
+                mutableStateOf(ThemePreference.SYSTEM)
+            }
+            // Move preference loading to a background thread to prevent blocking main thread
+            lifecycleScope.launch(Dispatchers.IO) {
+                val theme = getThemePreference(this@MainActivity)
+                withContext(Dispatchers.Main) {
+                    currentTheme = theme
+                }
             }
             var isSettingsOpen by remember { mutableStateOf(false) }
 
