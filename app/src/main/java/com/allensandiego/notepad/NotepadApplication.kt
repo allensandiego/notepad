@@ -11,6 +11,9 @@ class NotepadApplication : Application() {
         Bugsnag.start(this)
         BugsnagPerformance.start(this)
         
+        // Warm up SharedPreferences cache — avoids disk I/O on main thread
+        getSharedPreferences("notepad_prefs", MODE_PRIVATE)
+
         // Initialize AdMob
         MobileAds.initialize(this) {}
     }
