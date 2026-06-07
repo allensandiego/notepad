@@ -36,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -49,10 +48,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import android.widget.Toast
-import android.content.Context
-import android.content.ClipboardManager
-import android.content.ClipData
 import com.allensandiego.notepad.sync.SupabaseClient
 import com.allensandiego.notepad.sync.SyncEngine
 import kotlinx.coroutines.launch
@@ -61,6 +56,11 @@ import com.bugsnag.android.Bugsnag
 import com.bugsnag.android.BreadcrumbType
 
 import androidx.compose.material3.MaterialTheme
+import android.widget.Toast
+import android.content.Context
+import android.content.ClipboardManager
+import android.content.ClipData
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -456,10 +456,12 @@ fun ConnectionScreen(
                                 onClick = {
                                     val textToCopy = sqlScriptText
                                     if (textToCopy != null) {
-                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                        val clip = ClipData.newPlainText("Supabase SQL Script", textToCopy)
-                                        clipboard.setPrimaryClip(clip)
-                                        Toast.makeText(context, "SQL copied to clipboard!", Toast.LENGTH_SHORT).show()
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                                        if (clipboard != null) {
+                                            val clip = ClipData.newPlainText("Supabase SQL Script", textToCopy)
+                                            clipboard.setPrimaryClip(clip)
+                                            Toast.makeText(context, "SQL copied to clipboard!", Toast.LENGTH_SHORT).show()
+                                        }
                                     } else {
                                         Toast.makeText(context, "SQL script not loaded yet.", Toast.LENGTH_SHORT).show()
                                     }
