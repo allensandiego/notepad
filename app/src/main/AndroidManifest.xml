@@ -24,7 +24,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Notepad">
+            android:theme="@style/Theme.Notepad.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
